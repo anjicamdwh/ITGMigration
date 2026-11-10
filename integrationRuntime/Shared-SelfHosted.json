@@ -1,0 +1,13 @@
+{
+	"name": "Shared-SelfHosted",
+	"properties": {
+		"type": "SelfHosted",
+		"description": "Selfhosted IR created for Another ADF 'adfanjanpro' is shared to this 'adfITGMigration'",
+		"typeProperties": {
+			"linkedInfo": {
+				"resourceId": "/subscriptions/21f3af05-221b-4795-98df-57417fab9655/resourcegroups/rganjan/providers/Microsoft.DataFactory/factories/adfanjanpro/integrationruntimes/SelfHosted-integrationRuntime",
+				"authorizationType": "Rbac"
+			}
+		}
+	}
+}
