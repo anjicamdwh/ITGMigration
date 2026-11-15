@@ -27,13 +27,13 @@
 			"type": "string",
 			"defaultValue": "anjan"
 		},
-		"Ls_Itg_Migration_Adls_properties_typeProperties_url": {
-			"type": "string",
-			"defaultValue": "https://adlsitgmigration.dfs.core.windows.net/"
-		},
 		"Shared-SelfHosted_properties_typeProperties_linkedInfo_resourceId": {
 			"type": "string",
 			"defaultValue": "/subscriptions/21f3af05-221b-4795-98df-57417fab9655/resourcegroups/rganjan/providers/Microsoft.DataFactory/factories/adfanjanpro/integrationruntimes/SelfHosted-integrationRuntime"
+		},
+		"Ls_Itg_Migration_Adls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsitgmigration.dfs.core.windows.net/"
 		}
 	},
 	"variables": {
@@ -239,76 +239,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/PL_Child_SP')]",
-			"type": "Microsoft.DataFactory/factories/pipelines",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"activities": [
-					{
-						"name": "Stored procedure1",
-						"type": "SqlServerStoredProcedure",
-						"dependsOn": [],
-						"policy": {
-							"timeout": "0.12:00:00",
-							"retry": 0,
-							"retryIntervalInSeconds": 30,
-							"secureOutput": false,
-							"secureInput": false
-						},
-						"userProperties": [],
-						"typeProperties": {
-							"storedProcedureName": "[[dbo].[usp_updateWatermark]",
-							"storedProcedureParameters": {
-								"TableName": {
-									"value": {
-										"value": "@pipeline().parameters.Param_PL_TableName",
-										"type": "Expression"
-									},
-									"type": "String"
-								},
-								"TableSchema": {
-									"value": {
-										"value": "@pipeline().parameters.Param_PL_TableSchema",
-										"type": "Expression"
-									},
-									"type": "String"
-								},
-								"WatermarkColumn": {
-									"value": {
-										"value": "@pipeline().parameters.Param_PL_WaterMarkCol",
-										"type": "Expression"
-									},
-									"type": "String"
-								}
-							}
-						},
-						"linkedServiceName": {
-							"referenceName": "LS_OnPremiseSQL",
-							"type": "LinkedServiceReference"
-						}
-					}
-				],
-				"policy": {
-					"elapsedTimeMetric": {}
-				},
-				"parameters": {
-					"Param_PL_TableSchema": {
-						"type": "string"
-					},
-					"Param_PL_TableName": {
-						"type": "string"
-					},
-					"Param_PL_WaterMarkCol": {
-						"type": "string"
-					}
-				},
-				"annotations": []
-			},
-			"dependsOn": [
-				"[concat(variables('factoryId'), '/linkedServices/LS_OnPremiseSQL')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('factoryName'), '/PL_Parent_Orchestration')]",
 			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
@@ -486,6 +416,67 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('factoryName'), '/LS_OnPremiseSQL')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "SqlServer",
+				"typeProperties": {
+					"server": "[parameters('LS_OnPremiseSQL_properties_typeProperties_server')]",
+					"database": "[parameters('LS_OnPremiseSQL_properties_typeProperties_database')]",
+					"encrypt": "mandatory",
+					"trustServerCertificate": true,
+					"authenticationType": "SQL",
+					"userName": "[parameters('LS_OnPremiseSQL_properties_typeProperties_userName')]",
+					"password": {
+						"type": "SecureString",
+						"value": "[parameters('LS_OnPremiseSQL_password')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "Shared-SelfHosted",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('factoryId'), '/integrationRuntimes/Shared-SelfHosted')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Shared-SelfHosted')]",
+			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"type": "SelfHosted",
+				"description": "Selfhosted IR created for Another ADF 'adfanjanpro' is shared to this 'adfITGMigration'",
+				"typeProperties": {
+					"linkedInfo": {
+						"resourceId": "[parameters('Shared-SelfHosted_properties_typeProperties_linkedInfo_resourceId')]",
+						"authorizationType": "Rbac"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('factoryName'), '/Ls_Itg_Migration_Adls')]",
+			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"apiVersion": "2018-06-01",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('Ls_Itg_Migration_Adls_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('Ls_Itg_Migration_Adls_accountKey')]"
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
 			"name": "[concat(parameters('factoryName'), '/Ds_Sqltable_Parquet')]",
 			"type": "Microsoft.DataFactory/factories/datasets",
 			"apiVersion": "2018-06-01",
@@ -523,65 +514,74 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('factoryName'), '/LS_OnPremiseSQL')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
+			"name": "[concat(parameters('factoryName'), '/PL_Child_SP')]",
+			"type": "Microsoft.DataFactory/factories/pipelines",
 			"apiVersion": "2018-06-01",
 			"properties": {
-				"annotations": [],
-				"type": "SqlServer",
-				"typeProperties": {
-					"server": "[parameters('LS_OnPremiseSQL_properties_typeProperties_server')]",
-					"database": "[parameters('LS_OnPremiseSQL_properties_typeProperties_database')]",
-					"encrypt": "mandatory",
-					"trustServerCertificate": true,
-					"authenticationType": "SQL",
-					"userName": "[parameters('LS_OnPremiseSQL_properties_typeProperties_userName')]",
-					"password": {
-						"type": "SecureString",
-						"value": "[parameters('LS_OnPremiseSQL_password')]"
+				"activities": [
+					{
+						"name": "Stored procedure1",
+						"type": "SqlServerStoredProcedure",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"storedProcedureName": "[[dbo].[usp_updateWatermark]",
+							"storedProcedureParameters": {
+								"TableName": {
+									"value": {
+										"value": "@pipeline().parameters.Param_PL_TableName",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"TableSchema": {
+									"value": {
+										"value": "@pipeline().parameters.Param_PL_TableSchema",
+										"type": "Expression"
+									},
+									"type": "String"
+								},
+								"WatermarkColumn": {
+									"value": {
+										"value": "@pipeline().parameters.Param_PL_WaterMarkCol",
+										"type": "Expression"
+									},
+									"type": "String"
+								}
+							}
+						},
+						"linkedServiceName": {
+							"referenceName": "LS_OnPremiseSQL",
+							"type": "LinkedServiceReference"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {}
+				},
+				"parameters": {
+					"Param_PL_TableSchema": {
+						"type": "string"
+					},
+					"Param_PL_TableName": {
+						"type": "string"
+					},
+					"Param_PL_WaterMarkCol": {
+						"type": "string"
 					}
 				},
-				"connectVia": {
-					"referenceName": "Shared-SelfHosted",
-					"type": "IntegrationRuntimeReference"
-				}
+				"annotations": []
 			},
 			"dependsOn": [
-				"[concat(variables('factoryId'), '/integrationRuntimes/Shared-SelfHosted')]"
+				"[concat(variables('factoryId'), '/linkedServices/LS_OnPremiseSQL')]"
 			]
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Ls_Itg_Migration_Adls')]",
-			"type": "Microsoft.DataFactory/factories/linkedServices",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"annotations": [],
-				"type": "AzureBlobFS",
-				"typeProperties": {
-					"url": "[parameters('Ls_Itg_Migration_Adls_properties_typeProperties_url')]",
-					"accountKey": {
-						"type": "SecureString",
-						"value": "[parameters('Ls_Itg_Migration_Adls_accountKey')]"
-					}
-				}
-			},
-			"dependsOn": []
-		},
-		{
-			"name": "[concat(parameters('factoryName'), '/Shared-SelfHosted')]",
-			"type": "Microsoft.DataFactory/factories/integrationRuntimes",
-			"apiVersion": "2018-06-01",
-			"properties": {
-				"type": "SelfHosted",
-				"description": "Selfhosted IR created for Another ADF 'adfanjanpro' is shared to this 'adfITGMigration'",
-				"typeProperties": {
-					"linkedInfo": {
-						"resourceId": "[parameters('Shared-SelfHosted_properties_typeProperties_linkedInfo_resourceId')]",
-						"authorizationType": "Rbac"
-					}
-				}
-			},
-			"dependsOn": []
 		}
 	]
 }
