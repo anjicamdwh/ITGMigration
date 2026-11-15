@@ -18,7 +18,7 @@
 					"source": {
 						"type": "SqlServerSource",
 						"sqlReaderQuery": {
-							"value": "Select Max(@{pipeline().parameters.WaterMarkColumn})as MaxValue From @{pipeline().parameters.TableSchema}.@{pipeline().parameters.TableName}\n",
+							"value": "select Max(@{pipeline().parameters.WaterMarkColumn}) as MaxValue From @{pipeline().parameters.TableSchema}.@{pipeline().parameters.TableName}",
 							"type": "Expression"
 						},
 						"queryTimeout": "02:00:00",
@@ -31,10 +31,141 @@
 							"Param_Ds_TableName": {
 								"value": "@pipeline().parameters.TableName",
 								"type": "Expression"
+							},
+							"Param_Ds_TableSchema": {
+								"value": "@pipeline().parameters.TableSchema",
+								"type": "Expression"
 							}
 						}
+					}
+				}
+			},
+			{
+				"name": "If Condition",
+				"type": "IfCondition",
+				"dependsOn": [
+					{
+						"activity": "LKP_MAX_VALUE",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"userProperties": [],
+				"typeProperties": {
+					"expression": {
+						"value": "@or(equals(pipeline().parameters.LastLoadValue,null)\n,greater(int(activity('LKP_MAX_VALUE').output.firstRow.MaxValue),\nint(pipeline().parameters.LastLoadValue)))",
+						"type": "Expression"
 					},
-					"firstRowOnly": true
+					"ifTrueActivities": [
+						{
+							"name": "CopySQL_FULL_INCLOAD_TABLES",
+							"type": "Copy",
+							"dependsOn": [],
+							"policy": {
+								"timeout": "0.12:00:00",
+								"retry": 0,
+								"retryIntervalInSeconds": 30,
+								"secureOutput": false,
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"source": {
+									"type": "SqlServerSource",
+									"sqlReaderQuery": {
+										"value": "@concat(\n    'SELECT * FROM ',\n    pipeline().parameters.TableSchema, '.', pipeline().parameters.TableName,\n    if(\n        equals(pipeline().parameters.LastLoadValue, null),\n        '', \n        concat(\n            ' WHERE ', pipeline().parameters.WaterMarkColumn,\n            ' > ''', pipeline().parameters.LastLoadValue, ''''\n        )\n    )\n)",
+										"type": "Expression"
+									},
+									"queryTimeout": "02:00:00",
+									"partitionOption": "None"
+								},
+								"sink": {
+									"type": "ParquetSink",
+									"storeSettings": {
+										"type": "AzureBlobFSWriteSettings"
+									},
+									"formatSettings": {
+										"type": "ParquetWriteSettings"
+									}
+								},
+								"enableStaging": false,
+								"translator": {
+									"type": "TabularTranslator",
+									"typeConversion": true,
+									"typeConversionSettings": {
+										"allowDataTruncation": true,
+										"treatBooleanAsNumber": false
+									}
+								}
+							},
+							"inputs": [
+								{
+									"referenceName": "Ds_LKP_Max_Value",
+									"type": "DatasetReference",
+									"parameters": {
+										"Param_Ds_TableName": {
+											"value": "@pipeline().parameters.TableName",
+											"type": "Expression"
+										},
+										"Param_Ds_TableSchema": {
+											"value": "@pipeline().parameters.TableSchema",
+											"type": "Expression"
+										}
+									}
+								}
+							],
+							"outputs": [
+								{
+									"referenceName": "Ds_Sqltable_Parquet",
+									"type": "DatasetReference",
+									"parameters": {
+										"Table_Name": {
+											"value": "@pipeline().parameters.TableName",
+											"type": "Expression"
+										}
+									}
+								}
+							]
+						},
+						{
+							"name": "Execute Pipeline1",
+							"type": "ExecutePipeline",
+							"dependsOn": [
+								{
+									"activity": "CopySQL_FULL_INCLOAD_TABLES",
+									"dependencyConditions": [
+										"Succeeded"
+									]
+								}
+							],
+							"policy": {
+								"secureInput": false
+							},
+							"userProperties": [],
+							"typeProperties": {
+								"pipeline": {
+									"referenceName": "PL_Child_SP",
+									"type": "PipelineReference"
+								},
+								"waitOnCompletion": true,
+								"parameters": {
+									"Param_PL_TableSchema": {
+										"value": "@pipeline().parameters.TableSchema",
+										"type": "Expression"
+									},
+									"Param_PL_TableName": {
+										"value": "@pipeline().parameters.TableName",
+										"type": "Expression"
+									},
+									"Param_PL_WaterMarkCol": {
+										"value": "@pipeline().parameters.WaterMarkColumn",
+										"type": "Expression"
+									}
+								}
+							}
+						}
+					]
 				}
 			}
 		],
