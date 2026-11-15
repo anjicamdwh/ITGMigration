@@ -66,7 +66,7 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"TableSchema": {
-										"value": "@item().tableName",
+										"value": "@item().Tableschema",
 										"type": "Expression"
 									},
 									"TableName": {
