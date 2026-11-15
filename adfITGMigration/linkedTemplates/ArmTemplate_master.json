@@ -11,6 +11,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'password' of 'LS_OnPremiseSQL'"
 		},
+		"Ls_Itg_Migration_Adls_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'Ls_Itg_Migration_Adls'"
+		},
 		"LS_OnPremiseSQL_properties_typeProperties_server": {
 			"type": "string",
 			"defaultValue": "Anjicam"
@@ -26,6 +30,10 @@
 		"Shared-SelfHosted_properties_typeProperties_linkedInfo_resourceId": {
 			"type": "string",
 			"defaultValue": "/subscriptions/21f3af05-221b-4795-98df-57417fab9655/resourcegroups/rganjan/providers/Microsoft.DataFactory/factories/adfanjanpro/integrationruntimes/SelfHosted-integrationRuntime"
+		},
+		"Ls_Itg_Migration_Adls_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://adlsitgmigration.dfs.core.windows.net/"
 		},
 		"containerUri": {
 			"type": "string",
@@ -54,11 +62,17 @@
 					"factoryName": {
 						"value": "[parameters('factoryName')]"
 					},
+					"Ls_Itg_Migration_Adls_accountKey": {
+						"value": "[parameters('Ls_Itg_Migration_Adls_accountKey')]"
+					},
 					"LS_OnPremiseSQL_password": {
 						"value": "[parameters('LS_OnPremiseSQL_password')]"
 					},
 					"Shared-SelfHosted_properties_typeProperties_linkedInfo_resourceId": {
 						"value": "[parameters('Shared-SelfHosted_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"Ls_Itg_Migration_Adls_properties_typeProperties_url": {
+						"value": "[parameters('Ls_Itg_Migration_Adls_properties_typeProperties_url')]"
 					},
 					"LS_OnPremiseSQL_properties_typeProperties_server": {
 						"value": "[parameters('LS_OnPremiseSQL_properties_typeProperties_server')]"
