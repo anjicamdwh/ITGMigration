@@ -1,0 +1,77 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"factoryName": {
+			"type": "string",
+			"metadata": "Data Factory name",
+			"defaultValue": "adfITGMigration"
+		},
+		"LS_OnPremiseSQL_password": {
+			"type": "secureString",
+			"metadata": "Secure string for 'password' of 'LS_OnPremiseSQL'"
+		},
+		"LS_OnPremiseSQL_properties_typeProperties_server": {
+			"type": "string",
+			"defaultValue": "Anjicam"
+		},
+		"LS_OnPremiseSQL_properties_typeProperties_database": {
+			"type": "string",
+			"defaultValue": "ITG_Migration"
+		},
+		"LS_OnPremiseSQL_properties_typeProperties_userName": {
+			"type": "string",
+			"defaultValue": "anjan"
+		},
+		"Shared-SelfHosted_properties_typeProperties_linkedInfo_resourceId": {
+			"type": "string",
+			"defaultValue": "/subscriptions/21f3af05-221b-4795-98df-57417fab9655/resourcegroups/rganjan/providers/Microsoft.DataFactory/factories/adfanjanpro/integrationruntimes/SelfHosted-integrationRuntime"
+		},
+		"containerUri": {
+			"type": "string",
+			"metadata": "URI to storage account containing linked ARM templates"
+		},
+		"containerSasToken": {
+			"type": "string",
+			"metadata": "Sas token to storage account containing linked ARM templates"
+		}
+	},
+	"variables": {
+		"factoryId": "[concat('Microsoft.DataFactory/factories/', parameters('factoryName'))]"
+	},
+	"resources": [
+		{
+			"name": "adfITGMigration_ArmTemplate_0",
+			"type": "Microsoft.Resources/deployments",
+			"apiVersion": "2024-03-01",
+			"properties": {
+				"mode": "incremental",
+				"templateLink": {
+					"uri": "[concat(parameters('containerUri'), '/ArmTemplate_0.json', parameters('containerSasToken'))]",
+					"contentVersion": "1.0.0.0"
+				},
+				"parameters": {
+					"factoryName": {
+						"value": "[parameters('factoryName')]"
+					},
+					"LS_OnPremiseSQL_password": {
+						"value": "[parameters('LS_OnPremiseSQL_password')]"
+					},
+					"Shared-SelfHosted_properties_typeProperties_linkedInfo_resourceId": {
+						"value": "[parameters('Shared-SelfHosted_properties_typeProperties_linkedInfo_resourceId')]"
+					},
+					"LS_OnPremiseSQL_properties_typeProperties_server": {
+						"value": "[parameters('LS_OnPremiseSQL_properties_typeProperties_server')]"
+					},
+					"LS_OnPremiseSQL_properties_typeProperties_database": {
+						"value": "[parameters('LS_OnPremiseSQL_properties_typeProperties_database')]"
+					},
+					"LS_OnPremiseSQL_properties_typeProperties_userName": {
+						"value": "[parameters('LS_OnPremiseSQL_properties_typeProperties_userName')]"
+					}
+				}
+			},
+			"dependsOn": []
+		}
+	]
+}
