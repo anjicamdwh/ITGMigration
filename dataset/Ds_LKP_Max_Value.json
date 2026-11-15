@@ -1,0 +1,12 @@
+{
+	"name": "Ds_LKP_Max_Value",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "LS_OnPremiseSQL",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "SqlServerTable",
+		"schema": []
+	}
+}
