@@ -18,11 +18,11 @@
 		"schema": [],
 		"typeProperties": {
 			"schema": {
-				"value": "@dataset().SchemaName",
+				"value": "@dataset().Param_Ds_TableSchema",
 				"type": "Expression"
 			},
 			"table": {
-				"value": "@dataset().tableName",
+				"value": "@dataset().Param_Ds_TableName",
 				"type": "Expression"
 			}
 		}
