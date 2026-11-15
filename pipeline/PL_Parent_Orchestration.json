@@ -66,19 +66,19 @@
 								"waitOnCompletion": true,
 								"parameters": {
 									"TableSchema": {
-										"value": "@item().TableSchema",
+										"value": "@item().tableName",
 										"type": "Expression"
 									},
 									"TableName": {
-										"value": "@item().Table_Name",
+										"value": "@item().tableName",
 										"type": "Expression"
 									},
 									"WaterMarkColumn": {
-										"value": "@item().WaterMarkColumn",
+										"value": "@item().WatermarkColumn",
 										"type": "Expression"
 									},
 									"LastLoadValue": {
-										"value": "@item().LastLoadValue",
+										"value": "@item().Lastloadvalue",
 										"type": "Expression"
 									}
 								}
